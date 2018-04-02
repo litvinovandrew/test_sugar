@@ -25,9 +25,9 @@ class SugarAdapter
      */
     public function __construct()
     {
-        $this->instance_url = "https://e7920-93.mycrmspace.de/rest/v10";
-        $this->username = "andrii";
-        $this->password = "te)%=NP,qA-97XaDg8";
+        $this->instance_url = "https://dummy-93.mycrmspace.de/rest/v10";
+        $this->username = "username";
+        $this->password = "password";
     }
 
 
