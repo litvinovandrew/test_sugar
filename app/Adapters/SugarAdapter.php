@@ -1,16 +1,14 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: lee
- * Date: 4/1/18
- * Time: 10:52 PM
- */
 
 namespace App\Adapters;
 
 
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * Class SugarAdapter
+ * @package App\Adapters
+ */
 class SugarAdapter
 {
     const AUTH_CACHE_KEY = 'oauth_key';
@@ -21,6 +19,10 @@ class SugarAdapter
 
     public $oauth_token = null;
 
+    /**
+     * SugarAdapter constructor.
+     * Init credentials to the SugarCRM
+     */
     public function __construct()
     {
         $this->instance_url = "https://e7920-93.mycrmspace.de/rest/v10";
@@ -29,9 +31,12 @@ class SugarAdapter
     }
 
 
+    /**
+     * Function inits the sugar connection.
+     * It performs the authentification and stores  oauth_token to the cache.
+     */
     public function init()
     {
-
         if (Cache::has(self::AUTH_CACHE_KEY)) {
             $this->oauth_token = Cache::get(self::AUTH_CACHE_KEY);
         } else {
@@ -78,6 +83,7 @@ class SugarAdapter
     }
 
     /**
+     * Simple selects oportunities with given condition(filter)
      * @param int $minAmount
      * @return mixed
      */
@@ -88,18 +94,16 @@ class SugarAdapter
         $filter_arguments = [
             'filter' => [
                 ['amount' => ['$gte' => $minAmount]],
-//                [
-//                    'or' => [
-//                        ['sales_stage' => ['$not_equals	' => 'Closed Won']],
-//                        ['sales_stage' => ['$not_equals	' => 'Closed Lost']],
-//                    ]
-//                ],
+                ['sales_stage' => ['$not_in' => ['Closed Won','Closed Lost']]],
             ],
-//            'fields' => ['name', 'amount','related_account_id',
+            //here was the attempt to fetch in one request also values from the accounts but was not successed
+            //is there a way to fetch not only specific fields from module bu also specific fields from related module?
+
+//            'fields' => ['name', 'amount','related_account_id','sales_stage',
 //                'accounts',
 //                'accounts.billing_address_country',
 //                [
-//                    'name' => 'account',
+//                    'name' => 'accounts',
 //                    'fields' => [
 //                        'billing_address_country',
 //                        'billing_address_postalcode',
@@ -126,6 +130,7 @@ class SugarAdapter
     }
 
     /**
+     * Here was a try to fetch Accouns and at the same time filter by the related model field, but this returns strange result
      * @param int $minAmount
      * @return mixed
      */
@@ -135,7 +140,8 @@ class SugarAdapter
 
         $filter_arguments = [
             'filter' => [
-                ['opportunities.amount' => ['$gte' => $minAmount]]
+                ['opportunities.amount' => ['$gte' => $minAmount]],
+                ['opportunities.sales_stage' => ['$not_in' => ['Closed Won','Closed Lost']]],
             ],
         ];
 
@@ -155,6 +161,7 @@ class SugarAdapter
     }
 
     /**
+     * Fetches Account by given $id
      * @return null|string
      */
     public function getAccountByID($id)
@@ -182,7 +189,8 @@ class SugarAdapter
     }
 
     /**
-     * @param int $minAmount
+     * Here was a try to fetch all account by ids, but it also returns strange result.
+     * @param array $ids
      * @return mixed
      */
     public function getAccountsByIds(array $ids)
@@ -210,6 +218,12 @@ class SugarAdapter
 
     }
 
+    /**
+     * Method does routines of initing curl connection, that is the same for all requests
+     * @param $fetch_url
+     * @param $oauth_token
+     * @return resource
+     */
     private function setCurl($fetch_url, $oauth_token)
     {
 
@@ -230,6 +244,7 @@ class SugarAdapter
 
 
     /**
+     * Returns full accounts address
      * @param array $accounts
      * @return array|string
      */
