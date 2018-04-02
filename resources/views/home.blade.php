@@ -24,24 +24,33 @@
 
 <script>
 
-
+    /**
+     * this function is called after google js is initialized on the page
+      */
     function initMap() {
+        /**
+         * new Map object, cet center to Germany
+         * @type {google.maps.Map}
+         */
         var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 8,
+            zoom: 6,
             center: {lat: 51.612037, lng: 9.722828}
         });
 
         var geocoder = new google.maps.Geocoder();
 
-        //get addresses
+        //get addresses that are kept as "options" attributes of the 'map-data' element
         var options = document.getElementById('map-data').getAttribute("options");
         var obj = JSON.parse(options);
         console.log(obj);
 
         for (var key in obj) {
             var item = obj[key];
-            console.log(obj[key].account_address);
 
+            /**
+             * prepare content for every marker
+             * @type {string}
+             */
             var contentStr = '<div id="content">'+
                 '<div id="siteNotice">'+
                 '</div>'+
@@ -53,6 +62,7 @@
                 '<br><b>Sales stage </b>:'+ item.opportunity_sales_stage +
                 '</div>'+
                 '</div>';
+
             var infowindow = new google.maps.InfoWindow({
                 content: contentStr
             });
@@ -60,13 +70,15 @@
             geocodeAddress(geocoder, item.account_address, infowindow, map);
         }
 
-//        obj.forEach(function (element) {
-//            geocodeAddress(geocoder, element.account_address, map);
-//        });
-
     }
 
-
+    /**
+     * Finds the coordinates by text, places markers to the map
+     * @param geocoder
+     * @param address
+     * @param infoWindow
+     * @param resultsMap
+     */
     function geocodeAddress(geocoder, address, infoWindow, resultsMap) {
 
         geocoder.geocode({'address': address}, function (results, status) {
@@ -85,16 +97,11 @@
                 var bounds = new google.maps.LatLngBounds();
                 bounds.extend(marker.position);
 
-
             } else {
-                alert('Geocode was not successful for the following reason: ' + status);
+                console.log('Geocode was not successful for the following reason: ' + status);
             }
         });
     }
 
-
-</script>
-
-<script>
 
 </script>
