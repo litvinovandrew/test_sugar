@@ -29,15 +29,16 @@ class HomeController extends Controller
         $sugar = new SugarAdapter();
         $sugar->init();
 
-        $opportunities = $sugar->getSimpleOpportunities();
+//        $opportunities = $sugar->getSimpleOpportunities();
+        $opportunities = $sugar->getOpportunitiesRobin();
         foreach ($opportunities->records as $item) {
             //i know that it is not effective, but for me this is the only way to get account fields - is to make separate request for every id
-            $relatedAccount = $sugar->getAccountByID($item->accounts->id)->records[0];
+            $relatedAccount = $item->accounts->records[0];
 
             /**
              * prepare array of the data for the displaying on the map
              */
-            $result[$item->accounts->id] = [
+            $result[$relatedAccount->id] = [
                 'opportunity_name' => $item->name,
                 'opportunity_sales_stage' => $item->sales_stage,
                 'opportunity_amount' => $item->amount,
