@@ -25,9 +25,9 @@ class SugarAdapter
      */
     public function __construct()
     {
-        $this->instance_url = "https://dummy-93.mycrmspace.de/rest/v10";
-        $this->username = "username";
-        $this->password = "password";
+        $this->instance_url = "https://e7920-93.mycrmspace.de/rest/v10";
+        $this->username = "andrii";
+        $this->password = "te)%=NP,qA-97XaDg8";
     }
 
 
@@ -94,29 +94,85 @@ class SugarAdapter
         $filter_arguments = [
             'filter' => [
                 ['amount' => ['$gte' => $minAmount]],
-                ['sales_stage' => ['$not_in' => ['Closed Won','Closed Lost']]],
+                ['sales_stage' => ['$not_in' => ['Closed Won', 'Closed Lost']]],
             ],
             //here was the attempt to fetch in one request also values from the accounts but was not successed
             //is there a way to fetch not only specific fields from module bu also specific fields from related module?
 
-//            'fields' => ['name', 'amount','related_account_id','sales_stage',
-//                'accounts',
-//                'accounts.billing_address_country',
-//                [
-//                    'name' => 'accounts',
-//                    'fields' => [
-//                        'billing_address_country',
-//                        'billing_address_postalcode',
-//                        'billing_address_city',
-//                        'billing_address_street',
-//                    ]
-//                ]
-//            ]
+            'fields' => ['name', 'amount','related_account_id','sales_stage',
+                'accounts',
+                'accounts.billing_address_country',
+                [
+                    'name' => 'accounts',
+                    'fields' => [
+                        'name',
+                        'billing_address_country',
+                        'billing_address_postalcode',
+                        'billing_address_city',
+                        'billing_address_street',
+                    ]
+                ]
+            ]
         ];
 
         $fetch_request = $this->setCurl($fetch_url, $this->oauth_token);
         //convert arguments to json
         $json_arguments = json_encode($filter_arguments);
+        curl_setopt($fetch_request, CURLOPT_POST, 1);
+        curl_setopt($fetch_request, CURLOPT_POSTFIELDS, $json_arguments);
+
+        //execute request
+        $filter_response = curl_exec($fetch_request);
+
+        //decode json
+        $filter_response_obj = json_decode($filter_response);
+        return $filter_response_obj;
+
+    }
+
+    public function getOpportunitiesRobin($minAmount = 1000)
+    {
+        $fetch_url = $this->instance_url . "/Opportunities/filter";
+        $args = [
+            'filter' => [
+                '$and' => [
+                    'amount' => [
+                        '$gte' => 1000
+                    ],
+                    'sales_stage' => [
+                        '$not_in' => [
+                            'Closed Won',
+                            'Closed Lost'
+                        ]
+                    ]
+                ]
+            ],
+            'fields' => [
+                'id',
+                'name',
+                'sales_stage',
+                'amount',
+                'accounts',
+                [
+                    'name' => 'accounts',
+                    'fields' => [
+                        'id',
+                        'name',
+                        'billing_address_street',
+                        'billing_address_city',
+                        'billing_address_state',
+                        'billing_address_postalcode',
+                        'billing_address_country'
+                    ],
+                    'max_num' => 1
+                ]
+            ],
+            'order_by' => 'date_modified:desc',
+        ];
+
+        $fetch_request = $this->setCurl($fetch_url, $this->oauth_token);
+        //convert arguments to json
+        $json_arguments = json_encode($args);
         curl_setopt($fetch_request, CURLOPT_POST, 1);
         curl_setopt($fetch_request, CURLOPT_POSTFIELDS, $json_arguments);
 
@@ -141,7 +197,7 @@ class SugarAdapter
         $filter_arguments = [
             'filter' => [
                 ['opportunities.amount' => ['$gte' => $minAmount]],
-                ['opportunities.sales_stage' => ['$not_in' => ['Closed Won','Closed Lost']]],
+                ['opportunities.sales_stage' => ['$not_in' => ['Closed Won', 'Closed Lost']]],
             ],
         ];
 
