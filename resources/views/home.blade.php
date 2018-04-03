@@ -26,7 +26,7 @@
 
     /**
      * this function is called after google js is initialized on the page
-      */
+     */
     function initMap() {
         /**
          * new Map object, cet center to Germany
@@ -83,10 +83,16 @@
 
         geocoder.geocode({'address': address}, function (results, status) {
             if (status === 'OK') {
+
+                //add random delta to show points with the same coordinates
+                var randomLatDelta = Math.floor((Math.random() * 5) + 1)/100;
+                var randomLngDelta = Math.floor((Math.random() * 5) + 1)/100;
+
+                var location = results[0].geometry.location;
                 resultsMap.setCenter(results[0].geometry.location);
                 var marker = new google.maps.Marker({
                     map: resultsMap,
-                    position: results[0].geometry.location,
+                    position: {lat:location.lat()+ randomLatDelta, lng:location.lng()+randomLngDelta},
                     title: 'Account'
                 });
 
